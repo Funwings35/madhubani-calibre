@@ -1,0 +1,9 @@
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getSupabase } from '@/lib/supabase';
+export default function LoginPage(){
+  const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [message,setMessage]=useState(''); const [busy,setBusy]=useState(false); const router=useRouter();
+  async function submit(e:React.FormEvent){e.preventDefault();setMessage('');setBusy(true);const supabase=getSupabase();if(!supabase){setMessage('Supabase setup missing. Configure .env.local first.');setBusy(false);return;}const {error}=await supabase.auth.signInWithPassword({email,password});if(error){setMessage('Login failed. Check email/password or Supabase configuration.');setBusy(false);return;}router.replace('/admin');router.refresh();}
+  return <main className="loginbox"><a href="/" className="muted">← Back to store</a><div className="eyebrow" style={{marginTop:25}}>Private access</div><h1>Admin login</h1><p className="muted" style={{lineHeight:1.7}}>Sign in with an account created by the site owner in Supabase. Public sign-up is intentionally not provided.</p><form onSubmit={submit}><label className="field">Email address<input type="email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} required /></label><label className="field">Password<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={8}/></label><button className="btn" style={{width:'100%'}} disabled={busy}>{busy?'SIGNING IN…':'SIGN IN SECURELY'}</button></form>{message&&<p className="status" role="status">{message}</p>}<div className="notice">Never share your admin password or Supabase secret keys. Use a unique password and enable MFA in Supabase where available.</div></main>
+}
